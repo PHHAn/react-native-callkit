@@ -246,6 +246,12 @@ RCT_EXPORT_METHOD(setMutedCall:(NSString *)uuidString muted:(BOOL)muted)
                 callUpdate.supportsUngrouping = NO;
                 callUpdate.hasVideo = NO;
                 [self.callKitProvider reportCallWithUUID:startCallAction.callUUID updated:callUpdate];
+            } else if ([[transaction.actions firstObject] isKindOfClass:[CXEndCallAction class]]) {
+                // CSEndCallAction
+                CXEndCallAction *endCallAction = [transaction.actions firstObject];
+                NSString *callUUID = [self containsLowerCaseLetter:endCallAction.callUUID.UUIDString] ? endCallAction.callUUID.UUIDString : [endCallAction.callUUID.UUIDString lowercaseString];
+                [self sendEventWithName:RNCallKitPerformEndCallAction body:@{ @"callUUID": callUUID }];
+                [endCallAction fulfill];
             }
         }
     }];
